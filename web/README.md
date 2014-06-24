@@ -59,7 +59,7 @@ rm -rf $mydir/HangoutsNET
 
 Additional Dependencies
 =======================
-The HangoutsNET Web Application runs best with Oracle's Java 8 JRE, and also requires nginx and IRIS dependencies to be configured. A configuration file for nginx is shown in `nginx.conf` and IRIS instructions can be described at `https://github.com/atheme/iris`.
+The HangoutsNET Web Application runs best with Oracle's Java 8 JRE, and also requires nginx, MySQL, and IRIS dependencies to be configured. A configuration file for nginx is shown in `nginx.conf` and IRIS instructions can be described at `https://github.com/atheme/iris`.
 
 Configuration
 =============
