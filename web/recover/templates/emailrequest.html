@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name=viewport content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="/static/img/favicon.ico">
+
+  <title>HangoutsNET Account Recovery</title>
+  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+  <style type="text/css">
+    .container {
+      max-width: 800px !important;
+    }
+    .spacer {
+      height: 10px;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row clearfix">
+      <div class="col-md-12 column">
+        <h3 class="text-center">
+          HangoutsNET Account Recovery
+        </h3>
+        <div class="spacer"></div>
+        <p>
+          Enter your username into the box below and click <em>Recover</em> to begin the account recovery process.
+        </p>
+        <div class="spacer"></div>
+        <div id="alert" class="alert hidden"></div>
+        <form class="form-horizonal" role="form">
+          <div class="form-group">
+            <input id="info" type="text" class="form-control" placeholder="Your username..." />
+          </div>
+          <div class="form-group">
+            <button id="recover" type="submit" data-loading-text="Recovering..." class="btn btn-primary center-block">
+              Recover
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="/static/js/jquery-2.1.1.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script>
+    $("#recover").click(function(event) {
+      event.preventDefault();
+      $("#recover").button("loading");
+      $("#alert").hide().removeClass("alert-success alert-danger alert-warning hidden").empty();
+      $.ajax({
+        type: "POST",
+        url: "/recover/",
+        data: { info: $("#info").val() }
+      }).done(function(data) {
+        if (data == "bad_info") {
+          $("#alert").addClass("alert-danger").append("<strong>Careful!</strong> You need to provide valid account information in order to recover your account.").fadeIn();
+        } else if (data == "email_sent") {
+          $("#alert").addClass("alert-success").append("<strong>Success!</strong> An e-mail has been sent to your registered e-mail address with an account recovery link.").fadeIn();
+        } else if (data == "email_fail") {
+          $("#alert").addClass("alert-warning").append("<strong>Uh-oh!</strong> There seems to be a problem with our server sending out e-mails. Try again later. :(").fadeIn();
+        } else {
+          $("#alert").addClass("alert-warning").append("<strong>Uh-oh!</strong> You received malformed input from our server. There might be something wrong with your internet connection or our server. Try again. :(").fadeIn();
+        }
+      }).fail(function() {
+        $("#alert").addClass("alert-warning").append("<strong>Uh-oh!</strong> We sent your input to our server, but we didn't get a response back. Try again later. :(").fadeIn();
+      }).always(function() {
+        $("#recover").button("reset");
+      });
+    });
+  </script>
+</body>
+</html>

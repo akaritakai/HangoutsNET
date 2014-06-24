@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name=viewport content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="/static/img/favicon.ico">
+
+  <title>HangoutsNET Account Recovery</title>
+  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="row clearfix">
+      <div class="col-md-12 column">
+        <div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modal" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2 class="modal-title text-primary">Oops!</h2>
+              </div>
+              <div class="modal-body">
+                <h4>The specified recovery key is no longer valid or never was :(</h4>
+              </div>
+              <div class="modal-footer">
+                <button id="continue" type="button" class="btn btn-primary">Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/js/jquery-2.1.1.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script>
+    $(window).load(function() {
+      $("#modal").modal();
+    });
+    $("#continue").click(function(event) {
+      event.preventDefault();
+      window.location.replace("/recover/");
+    });
+  </script>
+</body>
+</html>

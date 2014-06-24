@@ -1,0 +1,214 @@
+#!/bin/bash
+
+usage() {
+        echo "This script updates and restarts various pieces of the HangoutsNET software."
+        echo "  update atheme"
+        echo "    This command updates and restarts Atheme IRC services"
+        echo "  update charybdis"
+        echo "    This command updates and restarts Charybdis IRCd"
+        echo "  update znc"
+        echo "    This command updates and restarts ZNC IRC Bouncer"
+        echo "  update hangoutsweb"
+        echo "    This command updates and restarts HangoutsWeb"
+        echo "  update all"
+        echo "    This command will perform all of the above actions"
+        exit 1
+}
+
+timer() {
+	local seconds=$1
+	local message=$2
+        local finished=$3
+	local end_date=$((`date +%s` + $seconds))
+	while [ "$end_date" -ne `date +%s` ]; do
+	  echo -ne "$message $(date -u --date @$(($end_date - `date +%s` )) +%S)\r"
+	  sleep 1
+	done
+        echo -e "\e[0K\r$finished"
+}
+
+stopwatch() {
+	local message=$1
+	local finished=$2
+	local tempfile=$3
+	local date=`date +%s`
+	while true; do
+          echo -ne "$message $(date -u --date @$((`date +%s` - $date)) +%M:%S)\r"
+	  sleep 1
+          [[ ! -f "$tempfile" ]] && break
+        done
+	echo -e "\e[0K\r$finished in $(date -u --date @$((`date +%s` - $date)) +%M:%S)"
+}
+
+stopwatch_launch() {
+	local bashcmd=$1
+	local message=$2
+	local finished=$3
+	local tempfile=`mktemp`
+	stopwatch "$message" "$finished" "$tempfile" & \
+          eval "$bashcmd" >> /var/log/hangouts.log 2>&1 
+	rm -f $tempfile
+	wait
+}
+
+atheme() {
+        # Get latest Atheme
+	git -C /usr/local/src/atheme clean -xdf
+        git -C /usr/local/src/atheme reset --hard
+        git -C /usr/local/src/atheme pull
+
+	# Make Atheme
+        cd /usr/local/src/atheme
+        ./configure --prefix="/opt/atheme" --enable-contrib --with-pcre --with-perl
+	make clean && make && make install 
+
+        # Get extra modules
+        cp /usr/local/src/extras/* /usr/local/src/atheme/modules/contrib/
+
+        # Build/Install extra modules
+	cd /usr/local/src/atheme/modules/contrib
+        make SRCS=cs_ponies.c
+        make SRCS=cs_ponies.c install
+        make SRCS=cs_hug.c
+        make SRCS=cs_hug.c install
+        make SRCS=cs_boop.c
+        make SRCS=cs_boop.c install
+
+        # Remove extraneous files
+        rm -f /opt/atheme/etc/*example
+}
+
+charybdis() {
+        # Get latest Charybdis
+	git -C /usr/local/src/charybdis clean -xdf
+        git -C /usr/local/src/charybdis reset --hard
+        git -c /usr/local/src/charybdis pull
+
+        # Build/Install Charybdis
+        cd /usr/local/src/charybdis
+        ./configure --prefix="/opt/charybdis" --enable-epoll --enable-openssl --enable-small-net
+	make clean && make && make install
+
+        # Remove extraneous files
+        rm -f /opt/charybdis/bin/*.old
+        rm -f /opt/charybdis/etc/ircd.conf.example
+        rm -f /opt/charybdis/etc/reference.conf
+        rm -rf /opt/charybdis/help-old
+        rm -rf /opt/charybdis/lib-old
+        rm -rf /opt/charybdis/modules-old
+}
+
+znc() {
+        # Get latest ZNC
+	git -C /usr/local/src/znc clean -xdf
+        git -C /usr/local/src/znc reset --hard
+        git -C /usr/local/src/znc pull
+
+        # Build/Install ZNC
+        cd /usr/local/src/znc
+        ./autogen.sh
+        ./configure --prefix="/opt/znc" --enable-cyrus
+	make clean && make && make install
+
+        # Get latest contrib modules
+	git -C /usr/local/src/znc-contrib clean -xdf
+        git -C /usr/local/src/znc-contrib reset --hard
+        git -C /usr/local/src/znc-contrib pull
+
+        # Build/Install contrib modules
+        cd /usr/local/src/znc-contrib
+        export PATH=$PATH:/opt/znc/bin
+        sed -i 's/MODDIR=.*/MODDIR=\/opt\/znc\/lib\/znc/' Makefile
+        make privmsg
+}
+
+iris() {
+	# Get latest IRIS
+	git -C /usr/local/src/iris clean -xdf
+	git -C /usr/local/src/iris reset --hard
+	git -C /usr/local/src/iris pull
+
+	# Build IRIS
+	rm -rf /opt/web/iris
+	cd /usr/local/src/iris
+	./clean.py
+	./compile.py
+	cp -R /usr/local/src/iris /opt/web/
+	chown -R www-data /opt/web/iris
+}
+
+hangoutsweb() {
+        # Build the latest version of HangoutsWeb
+        cd /usr/local/src/web
+        ant
+	iris
+}
+
+# Test for root (script must run with it)
+if [ "$(id -u)" != "0" ]; then
+        echo "This script must run as root"
+        exit 1
+fi
+
+# Check number of args
+if (( $# != 1 ))
+then
+        usage
+fi
+
+# Get the PWD
+current=$(pwd)
+
+# Update Atheme
+if [ $1 == "atheme" ]; then
+        stopwatch_launch atheme \
+          "atheme && initctl stop atheme && initctl start atheme" \
+          "Updating Atheme:" "Updated Atheme"
+elif [ $1 == "charybdis" ]; then
+	stopwatch_launch \
+          "charybdis && initctl stop charybdis && initctl start charybdis" \
+          "Updating Charybdis:" "Updated Charybdis"
+elif [ $1 == "znc" ]; then
+	stopwatch_launch \
+	  "znc && initctl stop znc && initctl start znc" \
+	  "Updating ZNC:" "Updated ZNC"
+elif [ $1 == "hangoutsweb" ]; then
+	stopwatch_launch \
+	  "hangoutsweb && initctl stop hangoutsweb && initctl start hangoutsweb" \
+	  "Updating HangoutsWeb:" "Updated HangoutsWeb"
+elif [ $1 == "all" ]; then
+	# Update the software
+	stopwatch_launch hangoutsweb "Updating HangoutsWeb:" "Updated HangoutsWeb"
+        stopwatch_launch atheme "Updating Atheme:" "Updated Atheme"
+        stopwatch_launch charybdis "Updating Charybdis:" "Updated Charybdis"
+        stopwatch_launch znc "Updating ZNC:" "Updated ZNC"
+
+	# Stop the software
+	stopwatch_launch \
+	  "initctl stop hangoutsweb
+           initctl stop atheme
+           initctl stop charybdis
+           initctl stop znc" \
+	  "Stopping HangoutsNET:" "Stopped HangoutsNET"
+
+	# Start the software
+	echo -e "Charybdis:   [\e[31mOFF\e[0m]"
+        initctl start charybdis >> /var/log/hangouts.log 2>&1
+        echo -ne "\e[1A"; echo -e "\e[0K\rCharybdis:   [\e[32mON\e[0m]"
+
+	timer 5 "Waiting to bring up Atheme:" "Atheme:      [\e[31mOFF\e[0m]"
+        initctl start atheme >> /var/log/hangouts.log 2>&1
+	echo -ne "\e[1A"; echo -e "\e[0K\rAtheme:      [\e[32mON\e[0m]"
+
+	timer 5 "Waiting to bring up ZNC:" "ZNC:         [\e[31mOFF\e[0m]"
+	initctl start znc >> /var/log/hangouts.log 2>&1
+	echo -ne "\e[1A"; echo -e "\e[0K\rZNC:         [\e[32mON\e[0m]"
+
+	timer 60 "Waiting to bring up HangoutsWeb:" "HangoutsWeb: [\e[31mOFF\e[0m]"
+        initctl start hangoutsweb >> /var/log/hangouts.log 2>&1
+	echo -ne "\e[1A"; echo -e "\e[0K\rHangoutsWeb: [\e[32mON\e[0m]"
+else
+        usage
+fi
+
+cd $current

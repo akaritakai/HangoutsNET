@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HangoutsNET</title>
+  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+  <style type="text/css">
+    html, body, .container {
+      background: url(/static/img/background.png) no-repeat center center fixed;
+      background: url(/static/img/background.svg);
+      background-repeat: no-repeat;
+      -webkit-background-size: cover;
+      -moz-background-size: cover;
+      -o-background-size: cover;
+      background-size: cover;
+      height: 100%;
+    }
+    .container {
+      display: table;
+      vertical-align: middle;
+    }
+    .vcentered-row {
+      display: table-cell;
+      vertical-align: middle;
+    }
+    .well {
+      background-color: rgba(245, 245, 245, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row vcentered-row">
+      <div class="col-md-12 column">
+        <div class="well text-center">
+          <div class="alert alert-info">
+            <p><strong>Sorry :(</strong></p>
+            <p>There isn't really anything here at the moment. But if you're looking to help keep the servers up... you could always donate. :)</p>
+          </div>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+          <input type="hidden" name="cmd" value="_s-xclick">
+          <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+          <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+          <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+          </form>
+          <a class="coinbase-button" data-code="0f4d862068b37f9236cd305dc431318d" data-button-style="donation_large" href="https://coinbase.com/checkouts/0f4d862068b37f9236cd305dc431318d">Donate Bitcoins</a><script src="https://coinbase.com/assets/button.js" type="text/javascript"></script>
+          <!-- Coming soon :) -->
+        </div> <!-- well -->
+      </div> <!-- column -->
+    </div> <!-- row -->
+  </div> <!-- container -->
+</body>
+</html>

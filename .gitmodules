@@ -1,0 +1,15 @@
+[submodule "web/iris"]
+	path = web/iris
+	url = git@github.com:akaritakai/iris.git
+[submodule "atheme/atheme"]
+	path = atheme/atheme
+	url = git@github.com:atheme/atheme.git
+[submodule "charybdis/charybdis"]
+	path = charybdis/charybdis
+	url = git@github.com:atheme/charybdis.git
+[submodule "znc/znc"]
+	path = znc/znc
+	url = git@github.com:znc/znc.git
+[submodule "znc/znc-contrib"]
+	path = znc/znc-contrib
+	url = git@github.com:kylef/znc-contrib.git
