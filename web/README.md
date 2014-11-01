@@ -12,11 +12,6 @@ The HangoutsNET Web Application was installed on chat.parted.me as follows:
 mydir=`pwd`
 git clone --recursive https://github.com/akaritakai/HangoutsNET
 
-# Populate the Ruby source in /usr/local/src/web
-mkdir /usr/local/src/web
-cp ./HangoutsNET/web/recover/build.xml /usr/local/src/web/build.xml
-cp -R ./HangoutsNET/web/recover/src /usr/local/src/web/
-
 # Populate the Ruby Source in /opt/web/
 mkdir /opt/web
 mkdir /opt/web/ruby
