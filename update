@@ -82,7 +82,7 @@ charybdis() {
 	# Get latest Charybdis
 	git -C /usr/local/src/charybdis clean -xdf
 	git -C /usr/local/src/charybdis reset --hard
-	git -c /usr/local/src/charybdis pull
+	git -C /usr/local/src/charybdis pull
 
 	# Build/Install Charybdis
 	cd /usr/local/src/charybdis
@@ -176,9 +176,9 @@ elif [ $1 == "hangoutsweb" ]; then
 elif [ $1 == "all" ]; then
 	# Update the software
 	stopwatch_launch hangoutsweb "Updating HangoutsWeb:" "Updated HangoutsWeb"
-		stopwatch_launch atheme "Updating Atheme:" "Updated Atheme"
-		stopwatch_launch charybdis "Updating Charybdis:" "Updated Charybdis"
-		stopwatch_launch znc "Updating ZNC:" "Updated ZNC"
+	stopwatch_launch atheme "Updating Atheme:" "Updated Atheme"
+	stopwatch_launch charybdis "Updating Charybdis:" "Updated Charybdis"
+	stopwatch_launch znc "Updating ZNC:" "Updated ZNC"
 
 	# Stop the software
 	stopwatch_launch \
