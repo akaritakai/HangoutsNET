@@ -59,7 +59,7 @@ post '/sasl/' do
   username = params[:username]
   password = params[:password]
   if !username.nil? or !username.empty?
-    user = HangoutsUser.from_info user
+    user = HangoutsUser.from_info username
     if !user.nil?
       if !password.nil? and password == user.get_password
         user.get_sasl_password
